@@ -1,0 +1,142 @@
+name: Backend
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+
+      - name: Install linters
+        run: pip install black ruff
+
+      - name: Run black
+        run: black src tests --check
+        if: always()
+
+      - name: Run ruff
+        run: ruff check src tests
+        if: always()
+
+  typecheck:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+
+      - name: Install mypy
+        # also install pydantic for mypy plugin/stubs
+        run: pip install mypy pydantic
+
+      - name: Run mypy
+        run: mypy src tests
+
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    services:
+      postgres:
+        image: "postgres:13.4"
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: db_test
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      ENV: test
+      SQLALCHEMY_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/db_test
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
+          export PATH='$HOME/.local/bin:$PATH'
+
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v2
+        id: poetry-cache
+        with:
+          path: /home/runner/.cache/pypoetry/virtualenvs
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install Dependencies using Poetry
+        if: steps.poetry-cache.outputs.cache-hit != 'true'
+        run: poetry install
+
+      - name: Run pytest and generate coverage XML report
+        run: poetry run pytest -s -v --junitxml=artifacts/results.xml --cov=src/ --cov-report term --cov-report xml:artifacts/coverage.xml
+
+      - name: Archive test results and code coverage
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: tests-coverage-report
+          path: backend/artifacts/*
+
+  build-docker-image:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    env:
+      ENV: test
+      SQLALCHEMY_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/db_test
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Create a .env file
+        run: env > .env
+
+      - name: Init variables
+        id: vars
+        run: |
+          echo ::set-output name=image_name::$(echo "eu.gcr.io/$GITHUB_REPOSITORY/backend")
+          echo ::set-output name=tag::$(echo "${GITHUB_SHA:0:7}")
+
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag ${{steps.vars.outputs.image_name}}:${{steps.vars.outputs.tag}}
+
+      - name: Test the Docker image
+        run: |
+          CONTAINER_ID=$(docker run --rm -d -p 8000:8000  ${{steps.vars.outputs.image_name}}:${{steps.vars.outputs.tag}} python -m uvicorn src.main:app --host 0.0.0.0 --port 8000)
+
+          # wait a few seconds before calling the health route
+          sleep 5 && CURL_OUTPUT=$(curl -isL localhost:8000/api/health)
+          docker stop "$CONTAINER_ID"
+
+          # if curl is not 200, output the value and fail the step
+          echo "$CURL_OUTPUT" | grep "200 OK" || (echo "$CURL_OUTPUT" && exit 1)

@@ -1,0 +1,57 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+# Triggers an immediate check for version updates on update
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    # Look for package.json in frontend dir
+    directory: "/frontend"
+    schedule:
+      interval: "monthly"
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "npm"
+    open-pull-requests-limit: 3
+
+  - package-ecosystem: "pip"
+    # Look for pyproject.toml & poetry.lock in backend dir
+    directory: "/backend"
+    schedule:
+      interval: "monthly"
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "poetry"
+    open-pull-requests-limit: 3
+
+  - package-ecosystem: "docker"
+    # Look for Dockerfile
+    directory: "/backend"
+    # Check for updates once a week
+    schedule:
+      interval: "monthly"
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "docker"
+    open-pull-requests-limit: 3
+  
+  - package-ecosystem: "docker"
+    # Look for Dockerfile
+    directory: "/frontend"
+    # Check for updates once a week
+    schedule:
+      interval: "monthly"
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "docker"
+    # Node to 17.x causes error
+    ignore:     
+      - dependency-name: "node"
+        versions: ["17.x"]
+    open-pull-requests-limit: 3

@@ -1,0 +1,34 @@
+{
+  "folders": [
+    {
+      "name": "root",
+      "path": "../"
+    },
+    {
+      "name": "frontend",
+      "path": "../frontend"
+    },
+    {
+      "name": "backend",
+      "path": "../backend"
+    }
+    // {
+    //   "name": "new_frontend",
+    //   "path": "../new_frontend"
+    // }
+  ],
+  "settings": {
+    "files.exclude": {
+      ".nuxt/": true,
+      ".mypy_cache/": true,
+      "**/__pycache__/": true,
+      ".pytest_cache/": true,
+      ".ruff_cache": true,
+      ".coverage": true,
+      "frontend/": true,
+      "backend/": true,
+      "new_frontend/": true
+    },
+    "typescript.tsdk": "node_modules/typescript/lib"
+  }
+}

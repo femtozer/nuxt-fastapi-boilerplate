@@ -1,0 +1,20 @@
+{
+  "recommendations": [
+    // POST CSS
+    "csstools.postcss",
+    // TAILWIND
+    "bradlc.vscode-tailwindcss",
+    // ESLINT
+    "dbaeumer.vscode-eslint",
+    // VOLAR
+    "vue.volar",
+    // PYTHON
+    "ms-python.python",
+    // RUFF
+    "charliermarsh.ruff",
+    // BLACK
+    "ms-python.black-formatter",
+    // DOCKER
+    "ms-azuretools.vscode-docker"
+  ]
+}
