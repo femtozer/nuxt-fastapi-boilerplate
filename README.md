@@ -1,10 +1,11 @@
-# Todo app
+# FastAPI + Nuxt boilerplate (todo app)
 
 ## Stack
 
 - [FastAPI](https://fastapi.tiangolo.com/)
 - [Postgres](https://www.postgresql.org/)
 - [Nuxt 3](https://nuxt.com/)
+- [Docker compose](https://docs.docker.com/compose/)
 
 ## Run app
 
