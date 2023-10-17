@@ -48,7 +48,7 @@ jobs:
 
       - name: Install mypy
         # also install pydantic for mypy plugin/stubs
-        run: pip install mypy pydantic SQLAlchemy
+        run: pip install mypy pydantic
 
       - name: Run mypy
         run: mypy src tests
