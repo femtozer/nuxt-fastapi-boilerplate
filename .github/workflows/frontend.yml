@@ -38,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
+      - name: Generate types
+        run: npx nuxi prepare
+
       - name: Run eslint
         run: npm run lint:eslint
         if: always()
