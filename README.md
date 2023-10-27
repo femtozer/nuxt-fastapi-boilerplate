@@ -10,7 +10,7 @@
 ## Run app
 
 ```bash
-docker-compose up [--build] [--renew-anon-volumes] [--detach]
+docker compose up [--build] [--renew-anon-volumes] [--detach]
 ```
 
 Use `--build --renew-anon-volumes` if npm/pip dependencies have been updated  
@@ -21,13 +21,13 @@ You will need to install both Skaffold and Minikube.
 ## Stop app
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ## Upgrade db
 
 ```bash
-docker-compose exec api alembic upgrade head
+docker compose exec api alembic upgrade head
 ```
 
 ## App UI
@@ -44,9 +44,13 @@ docker-compose exec api alembic upgrade head
 Open project using workspace file:
 
 ```bash
-code .vscode/todo-fastapi-nuxt.code-workspace
+code .vscode/fastapi-nuxt-boilerplate.code-workspace
 ```
 
 You can run the app using launch config:
 
-- docker-compose: up (root)
+- docker compose: up (root)
+
+You can attach vscode python debugger to container using launch config:
+
+- docker compose: debug backend

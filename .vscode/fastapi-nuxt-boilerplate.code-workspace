@@ -12,10 +12,6 @@
       "name": "backend",
       "path": "../backend"
     }
-    // {
-    //   "name": "new_frontend",
-    //   "path": "../new_frontend"
-    // }
   ],
   "settings": {
     "files.exclude": {

@@ -1,6 +1,6 @@
 <template>
   <div class="w-full">
-    <div class="h-1 w-fulloverflow-hidden">
+    <div class="h-1 w-full overflow-hidden">
       <div class="progress w-full h-full bg-neutral-600 left-right" />
     </div>
   </div>
