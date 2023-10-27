@@ -22,7 +22,8 @@ jobs:
           python-version: 3.11
 
       - name: Install linters
-        run: pip install black ruff
+        run: pip install black ruff mypy pydantic
+        if: always()
 
       - name: Run black
         run: black src tests --check
@@ -32,26 +33,9 @@ jobs:
         run: ruff check src tests
         if: always()
 
-  typecheck:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
-    steps:
-      - name: Check out the code
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-
-      - name: Install mypy
-        # also install pydantic for mypy plugin/stubs
-        run: pip install mypy pydantic
-
       - name: Run mypy
         run: mypy src tests
+        if: always()
 
   test:
     runs-on: ubuntu-latest
