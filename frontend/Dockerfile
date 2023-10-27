@@ -1,10 +1,19 @@
-FROM node:20-alpine3.18
-WORKDIR /code
-COPY ./package*.json /code/
-RUN npm install
-COPY . /code
-RUN npm run build
-ENV NUXT_HOST=0.0.0.0
-ENV NUXT_PORT=3000
-EXPOSE 3000
-CMD ["npm", "start"]
+FROM node:20-alpine3.18 AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+COPY . /app
+WORKDIR /app
+
+FROM base AS prod-deps
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile --ignore-scripts
+
+FROM base AS build
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm run build
+
+FROM base
+COPY --from=prod-deps /app/node_modules /app/node_modules
+COPY --from=build /app/.output /app/.output
+EXPOSE 8000
+CMD [ "node", ".output/server/index.mjs" ]
