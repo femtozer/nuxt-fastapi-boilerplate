@@ -38,5 +38,57 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
-      - name: Run lint
-        run: npm run lint
+      - name: Generate types
+        run: npx nuxi prepare
+
+      - name: Run eslint
+        run: npm run lint:eslint
+        if: always()
+
+      - name: Run tsc
+        run: npm run lint:tsc
+        if: always()
+
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Generate types
+        run: npx nuxi prepare
+
+      - name: Run tests + coverage
+        run: npm run coverage
+
+      - name: Archive test results and code coverage
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: code-coverage-report
+          path: frontend/coverage/*

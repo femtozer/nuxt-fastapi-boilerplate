@@ -14,15 +14,16 @@ jobs:
         working-directory: ./backend
     steps:
       - name: Check out the code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
       - name: Install linters
-        run: pip install black ruff
+        run: pip install black ruff mypy pydantic
+        if: always()
 
       - name: Run black
         run: black src tests --check
@@ -32,26 +33,9 @@ jobs:
         run: ruff check src tests
         if: always()
 
-  typecheck:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
-    steps:
-      - name: Check out the code
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-
-      - name: Install mypy
-        # also install pydantic for mypy plugin/stubs
-        run: pip install mypy pydantic
-
       - name: Run mypy
         run: mypy src tests
+        if: always()
 
   test:
     runs-on: ubuntu-latest
@@ -76,7 +60,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
@@ -86,7 +70,7 @@ jobs:
           export PATH='$HOME/.local/bin:$PATH'
 
       - name: Cache Poetry virtualenv
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: poetry-cache
         with:
           path: /home/runner/.cache/pypoetry/virtualenvs
@@ -100,8 +84,8 @@ jobs:
         run: poetry run pytest -s -v --junitxml=artifacts/results.xml --cov=src/ --cov-report term --cov-report xml:artifacts/coverage.xml
 
       - name: Archive test results and code coverage
+        uses: actions/upload-artifact@v3
         if: always()
-        uses: actions/upload-artifact@v2
         with:
-          name: tests-coverage-report
+          name: code-coverage-report
           path: backend/artifacts/*
