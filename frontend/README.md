@@ -5,6 +5,9 @@
 - [Nuxt 3](https://nuxt.com)
 - [Pinia](https://pinia.vuejs.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
+- [Vitest](https://vitest.dev/)
+- [ESLint](https://eslint.org/)
+- [Faker](https://fakerjs.dev/)
 
 ## Build Setup
 
